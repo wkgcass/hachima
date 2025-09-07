@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哈基码 - 编码/解码工具</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --error-color: #f72585;
+            --border-radius: 8px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f5f7ff;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .description {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+            background-color: var(--light-color);
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            resize: vertical;
+            font-size: 16px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .result-container {
+            margin-top: 15px;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 10;
+        }
+        
+        .alert {
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .alert-error {
+            background-color: #ffebee;
+            color: var(--error-color);
+            border: 1px solid #ffcdd2;
+        }
+        
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        /* 移动设备优化 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            /* 优化复制按钮 */
+            .copy-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                width: auto;
+                min-width: 60px;
+            }
+            
+            textarea {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 12px;
+                border-radius: 6px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .copy-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+                min-width: 50px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .description {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>哈基码 - 编码/解码工具</h1>
+            <p class="description">快速将文本转换为哈基码，或将哈基码解码为原始文本</p>
+        </header>
+        
+        <div class="card">
+            <div class="card-header">哈基编码</div>
+            <div class="card-body">
+                <textarea id="encodeInput" placeholder="请输入要编码的文本..."></textarea>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="encodeText()">编码</button>
+                    <button class="btn-secondary" onclick="clearEncodeArea()">清空</button>
+                </div>
+                <div class="alert" id="encodeAlert"></div>
+                <div class="result-container">
+                    <textarea id="encodeResult" readonly placeholder="编码结果将显示在这里..."></textarea>
+                    <button class="copy-btn" onclick="copyToClipboard('encodeResult')">复制</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">哈基解码</div>
+            <div class="card-body">
+                <textarea id="decodeInput" placeholder="请输入要解码的哈基码字符串..."></textarea>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="decodeText()">解码</button>
+                    <button class="btn-secondary" onclick="clearDecodeArea()">清空</button>
+                </div>
+                <div class="alert" id="decodeAlert"></div>
+                <div class="result-container">
+                    <textarea id="decodeResult" readonly placeholder="解码结果将显示在这里..."></textarea>
+                    <button class="copy-btn" onclick="copyToClipboard('decodeResult')">复制</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>哈基码编码/解码工具 &copy; 2025</p>
+            <p>https://github.com/wkgcass/hachima</p>
+        </footer>
+    </div>
+
+    <script type='module' src='./hachima.mjs'></script>
+    <script type='module'>
+        import { encode, decode } from './hachima.mjs'
+        // 编码
+        function encodeText() {
+            const input = document.getElementById('encodeInput').value;
+            const resultElement = document.getElementById('encodeResult');
+            const alertElement = document.getElementById('encodeAlert');
+            
+            if (!input) {
+                showAlert(alertElement, '请输入要编码的文本', 'error');
+                return;
+            }
+            
+            try {
+                // 处理Unicode字符
+                const utf8Bytes = new TextEncoder().encode(input);
+                let binary = '';
+                for (let i = 0; i < utf8Bytes.length; i++) {
+                    binary += String.fromCharCode(utf8Bytes[i]);
+                }
+                const base64 = encode(binary);
+                resultElement.value = base64;
+                showAlert(alertElement, '编码成功！', 'success');
+            } catch (error) {
+                showAlert(alertElement, '编码过程中发生错误: ' + error.message, 'error');
+            }
+        }
+        window.encodeText = encodeText;
+        
+        // 解码到文本
+        function decodeText() {
+            const input = document.getElementById('decodeInput').value;
+            const resultElement = document.getElementById('decodeResult');
+            const alertElement = document.getElementById('decodeAlert');
+            
+            if (!input) {
+                showAlert(alertElement, '请输入要解码的哈基码字符串', 'error');
+                return;
+            }
+            
+            try {
+                // 移除可能的多余空格
+                const cleanInput = input.replace(/\s/g, '');
+                const binary = decode(cleanInput);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                const decoded = new TextDecoder().decode(bytes);
+                resultElement.value = decoded;
+                showAlert(alertElement, '解码成功！', 'success');
+            } catch (error) {
+                showAlert(alertElement, '解码失败：无效的哈基码字符串', 'error');
+            }
+        }
+        window.decodeText = decodeText;
+        
+        // 显示提示信息
+        function showAlert(element, message, type) {
+            element.textContent = message;
+            element.className = 'alert';
+            element.classList.add(type === 'error' ? 'alert-error' : 'alert-success');
+            element.style.display = 'block';
+            
+            var timeout;
+            if (type !== 'error') {
+                // 10秒后自动隐藏提示
+                timeout = setTimeout(() => {
+                    element.style.display = 'none';
+                    element.displayTimeout = null;
+                }, 10000);
+            }
+            if (element.displayTimeout) {
+                clearTimeout(element.displayTimeout);
+                element.displayTimeout = null;
+            }
+            if (timeout) {
+                element.displayTimeout = timeout;
+            }
+        }
+        
+        // 复制到剪贴板
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            
+            // 显示临时提示
+            const alertElement = document.getElementById(elementId.replace('Result', 'Alert'));
+            showAlert(alertElement, '已复制到剪贴板！', 'success');
+        }
+        window.copyToClipboard = copyToClipboard;
+        
+        // 清空编码区域
+        function clearEncodeArea() {
+            document.getElementById('encodeInput').value = '';
+            document.getElementById('encodeResult').value = '';
+            document.getElementById('encodeAlert').style.display = 'none';
+        }
+        window.clearEncodeArea = clearEncodeArea;
+        
+        // 清空解码区域
+        function clearDecodeArea() {
+            document.getElementById('decodeInput').value = '';
+            document.getElementById('decodeResult').value = '';
+            document.getElementById('decodeAlert').style.display = 'none';
+        }
+        window.clearDecodeArea = clearDecodeArea;
+        
+        // 添加实时输入监听（可选功能）
+        document.addEventListener('DOMContentLoaded', function() {
+            // 编码区域实时转换
+            document.getElementById('encodeInput').addEventListener('input', function() {
+                if (this.value) {
+                    encodeText();
+                } else {
+                    document.getElementById('encodeResult').value = '';
+                    document.getElementById('encodeAlert').style.display = 'none';
+                }
+            });
+            
+            // 解码区域实时转换
+            document.getElementById('decodeInput').addEventListener('input', function() {
+                if (this.value) {
+                    decodeText();
+                } else {
+                    document.getElementById('decodeResult').value = '';
+                    document.getElementById('decodeAlert').style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
