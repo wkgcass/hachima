@@ -28,3 +28,11 @@ def decode(r):
     if padding != 4:
         s += '=' * padding
     return base64.b64decode(s)
+
+"""
+if __name__ == '__main__':
+    import os
+    #create folder under ./audioClips/HACHIMA.each()
+    for i in range(len(HACHIMA)):
+        os.makedirs('./audioClips/' + HACHIMA[i], exist_ok=True)
+"""

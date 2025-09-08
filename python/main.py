@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import hachima
+import hachiAudio
 
 def __main():
     s = 'hello, world! 你好，世界！'
     encoded = hachima.encode(s.encode('utf-8'))
     print(encoded)
+
+    hachiAudio.makeNoice(encoded)
+
     decoded = hachima.decode(encoded)
     print(decoded.decode('utf-8'))
 
